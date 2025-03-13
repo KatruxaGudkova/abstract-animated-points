@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import gsap from "gsap";
 import { addPass, useCamera, useGui, useRenderSize, useScene, useTick } from './render/init.js'
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
+
 // import postprocessing passes
 import { SavePass } from 'three/examples/jsm/postprocessing/SavePass.js'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
@@ -158,11 +160,23 @@ const startApp = () => {
   // const ico = new THREE.Mesh(geometry, material)
   // scene.add(ico)
 
+
+  const exporter = new GLTFExporter();
+
+function exportModel() {
+  exporter.parse(scene, function (gltf) {
+    const blob = new Blob([JSON.stringify(gltf)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'model.gltf';
+    link.click();
+  }, { binary: true });
+}
   // GUI
   const cameraFolder = gui.addFolder('Camera')
   cameraFolder.add(camera.position, 'z', 0, 10)
   cameraFolder.open()
-
+  gui.add({ exportModel }, 'exportModel').name('Export Model');
   // postprocessing
   // const renderTargetParameters = {
   //   minFilter: THREE.LinearFilter,
