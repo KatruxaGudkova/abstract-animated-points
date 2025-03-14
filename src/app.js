@@ -1,22 +1,7 @@
 import * as THREE from 'three'
 import gsap from "gsap";
 import { addPass, useCamera, useGui, useRenderSize, useScene, useTick } from './render/init.js'
-import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
-
-// import postprocessing passes
-import { SavePass } from 'three/examples/jsm/postprocessing/SavePass.js'
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
-import { BlendShader } from 'three/examples/jsm/shaders/BlendShader.js'
-import { CopyShader } from 'three/examples/jsm/shaders/CopyShader.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
-
-import vertexShader from './shaders/vertex.glsl'
-import fragmentShader from './shaders/fragment.glsl'
-
-import vertexPars from './shaders/vertex_pars.glsl'
-import vertexMain from './shaders/vertex_main.glsl'
-import fragmentPars from './shaders/fragment_pars.glsl'
-import fragmentMain from './shaders/fragment_main.glsl'
 
 const startApp = () => {
   const scene = useScene()
@@ -24,30 +9,12 @@ const startApp = () => {
   const gui = useGui()
   const { width, height } = useRenderSize()
 
-  // settings
-  const MOTION_BLUR_AMOUNT = 0.725
-
   // lighting
   const dirLight = new THREE.DirectionalLight('#ADFF2F', 0.6)
   dirLight.position.set(2, 2, 2)
 
   const ambientLight = new THREE.AmbientLight('#526cff', 0.5)
   scene.add(dirLight, ambientLight)
-
-
-  // HemisphereLightHelper
-  // const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
-  // const helper = new THREE.HemisphereLightHelper(light, 5);
-  // scene.add(helper);
-
-  // // PolarGridHelper
-  // const radius = 10;
-  // const sectors = 16;
-  // const rings = 8;
-  // const divisions = 64;
-
-  // const helper = new THREE.PolarGridHelper(radius, sectors, rings, divisions);
-  // scene.add(helper);
 
   // meshes
   const geometry = new THREE.IcosahedronGeometry(1, 40)
@@ -124,87 +91,22 @@ const startApp = () => {
 
   const points = new THREE.Points(geometry, material);
   scene.add(points);
-  // const material = new THREE.MeshStandardMaterial({
-  //   onBeforeCompile: (shader) => {
-  //     // storing a reference to the shader object
-  //     material.userData.shader = shader
 
-  //     // uniforms
-  //     shader.uniforms.uTime = { value: 0 }
-
-  //     const parsVertexString = /* glsl */ `#include <displacementmap_pars_vertex>`
-  //     shader.vertexShader = shader.vertexShader.replace(
-  //       parsVertexString,
-  //       parsVertexString + vertexPars
-  //     )
-
-  //     const mainVertexString = /* glsl */ `#include <displacementmap_vertex>`
-  //     shader.vertexShader = shader.vertexShader.replace(
-  //       mainVertexString,
-  //       mainVertexString + vertexMain
-  //     )
-
-  //     const mainFragmentString = /* glsl */ `#include <normal_fragment_maps>`
-  //     const parsFragmentString = /* glsl */ `#include <bumpmap_pars_fragment>`
-  //     shader.fragmentShader = shader.fragmentShader.replace(
-  //       parsFragmentString,
-  //       parsFragmentString + fragmentPars
-  //     )
-  //     shader.fragmentShader = shader.fragmentShader.replace(
-  //       mainFragmentString,
-  //       mainFragmentString + fragmentMain
-  //     )
-  //   },
-  // })
-
-  // const ico = new THREE.Mesh(geometry, material)
-  // scene.add(ico)
-
-
-  const exporter = new GLTFExporter();
-
-function exportModel() {
-  exporter.parse(scene, function (gltf) {
-    const blob = new Blob([JSON.stringify(gltf)], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'model.gltf';
-    link.click();
-  }, { binary: true });
-}
   // GUI
   const cameraFolder = gui.addFolder('Camera')
   cameraFolder.add(camera.position, 'z', 0, 10)
   cameraFolder.open()
-  gui.add({ exportModel }, 'exportModel').name('Export Model');
-  // postprocessing
-  // const renderTargetParameters = {
-  //   minFilter: THREE.LinearFilter,
-  //   magFilter: THREE.LinearFilter,
-  //   stencilBuffer: false,
-  // }
-
 
   // postprocessing
   addPass(new UnrealBloomPass(new THREE.Vector2(width, height), 0.7, 0.4, 0.4))
 
-  // useTick(({ timestamp, timeDiff }) => {
-  //   const time = timestamp / 5000
-  //   material.userData.shader.uniforms.uTime.value = time
-
-  // })
-
-
   useTick(({ timestamp }) => {
     material.uniforms.uTime.value = timestamp / 1000;
   });
-  
 
   setInterval(() => {
     points.rotation.x += 0.001
     points.rotation.z += 0.001
-    // points.position.x += 0.01
-    // points.position.y += 0.01
   }, 15)
 
   let exploded = false;
