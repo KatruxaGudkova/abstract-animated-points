@@ -4,7 +4,6 @@ import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
-import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
 // import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import TickManager from './tick-manager.js'
 
@@ -62,6 +61,11 @@ export const initEngine = async () => {
 
   controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
+
+  // запретила вращение мышкой и зум
+  controls.enableZoom = false;
+  controls.enableRotate = false;
+  controls.enablePan = false;
 
   window.addEventListener(
     'resize',

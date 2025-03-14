@@ -3,9 +3,11 @@ import gsap from "gsap";
 import { addPass, useCamera, useGui, useRenderSize, useScene, useTick } from './render/init.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 
+
 const startApp = () => {
   const scene = useScene()
   const camera = useCamera()
+
   const gui = useGui()
   const { width, height } = useRenderSize()
 
@@ -17,7 +19,7 @@ const startApp = () => {
   scene.add(dirLight, ambientLight)
 
   // meshes
-  const geometry = new THREE.IcosahedronGeometry(1, 40)
+  const geometry = new THREE.IcosahedronGeometry(1, 35)
 
   const positions = geometry.attributes.position.array;
 
@@ -28,14 +30,72 @@ const startApp = () => {
     positions[i + 2] *= factor;
   }
 
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  let isHovered = false;
+
+  let hoverTimeout;
+  let isInside = false;
+
+  function onMouseMove(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // Проверяем пересечение луча с фигурой
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(points);
+
+    if (intersects.length > 0) {
+      // Мышка находится внутри фигуры
+      if (!isInside) {
+        // Мышка только что вошла внутрь, запускаем эффект
+        isInside = true;
+        gsap.to(material.uniforms.uHoverEffect, {
+          value: 1.0,
+          duration: 2,
+          ease: "power2.out"
+        });
+
+        clearTimeout(hoverTimeout);
+        hoverTimeout = setTimeout(() => {
+          isInside = false;
+          gsap.to(material.uniforms.uHoverEffect, {
+            value: 0.0,
+            duration: 0.5,
+            ease: "power2.out"
+          });
+        }, 600); // Сбрасываем эффект через 2 секунды
+      }
+    } else {
+      // Мышка вышла за пределы фигуры
+      if (isInside) {
+        // Мышка только что покинула пределы
+        isInside = false;
+        gsap.to(material.uniforms.uHoverEffect, {
+          value: 0.0,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+      }
+    }
+  }
+
+
+
+
+  window.addEventListener("mousemove", onMouseMove);
+
+
   const material = new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uExplode: { value: 0 } // Управляет разлётом (0 - норм, 1 - разлетелись)
+      uExplode: { value: 0 }, // Управляет разлётом (0 - норм, 1 - разлетелись)
+      uHoverEffect: { value: 0 } // Эффект желе
     },
     vertexShader: `
       uniform float uTime;
       uniform float uExplode;
+      uniform float uHoverEffect;
       varying float vGradient;
 
       void main() {
@@ -55,9 +115,13 @@ const startApp = () => {
 
         pos += normal * noise;
 
+        
+        // Эффект желе при наведении
+        float hoverWave = sin(pos.x * 5.0 + uTime * 1.0) * 0.2 + cos(pos.y * 4.0 + uTime * 2.5) * 0.15;
+        pos += normal * hoverWave * uHoverEffect;
   
-        // Разлёт при двойном клике
-        pos += normal * uExplode * 2.0;
+        // // Разлёт при двойном клике
+        // pos += normal * uExplode * 2.0;
 
         // Вычисляем градиент по y-координате
         vGradient = (pos.y + 2.0) / 4.0; // Нормализация в диапазон 0-1 
@@ -70,10 +134,15 @@ const startApp = () => {
       varying float vGradient;
       
       void main() {
-        vec3 color1 = vec3(0.2, 0.6, 1.0);
-        vec3 color2 = vec3(0.1, 0.4, 1.0);
-        vec3 color3 = vec3(0.3, 0.2, 0.6);
-        vec3 color4 = vec3(1.0, 0.3, 0.8);
+        // vec3 color1 = vec3(0.2, 0.6, 1.0);
+        // vec3 color2 = vec3(0.1, 0.4, 1.0);
+        // vec3 color3 = vec3(0.3, 0.2, 0.6);
+        // vec3 color4 = vec3(1.0, 0.3, 0.8);
+
+        vec3 color1 = vec3(1.0, 0.3, 0.8);
+        vec3 color2 = vec3(0.3, 0.2, 0.6);
+        vec3 color3 = vec3(0.1, 0.4, 1.0);
+        vec3 color4 = vec3(0.2, 0.6, 1.0);
       
     vec3 mixedColor;
     if (vGradient < 0.33) {
@@ -89,26 +158,60 @@ const startApp = () => {
     `
   });
 
+
   const points = new THREE.Points(geometry, material);
   scene.add(points);
 
+
   // GUI
-  const cameraFolder = gui.addFolder('Camera')
-  cameraFolder.add(camera.position, 'z', 0, 10)
-  cameraFolder.open()
+  // const cameraFolder = gui.addFolder('Camera')
+  camera.position.z = 11; // Фиксируем z на нужном значении
+
+  // cameraFolder.add(camera.position, 'z', 8, 10)
+  // cameraFolder.open()
 
   // postprocessing
   addPass(new UnrealBloomPass(new THREE.Vector2(width, height), 0.7, 0.4, 0.4))
 
   useTick(({ timestamp }) => {
+    camera.position.z = 11;
+    points.rotation.set(0.7, 0, 0.5);
     material.uniforms.uTime.value = timestamp / 1000;
+
+    // Плавное изменение эффекта желе
+    if (isInside) {
+      gsap.to(material.uniforms.uHoverEffect, {
+        value: 1.0,
+        duration: 2,
+        ease: "power2.out"
+      });
+    } else {
+      gsap.to(material.uniforms.uHoverEffect, {
+        value: 0.0,
+        duration: 0.5,
+        ease: "power2.out"
+      });
+    }
   });
 
-  setInterval(() => {
-    points.rotation.x += 0.001
-    points.rotation.z += 0.001
-  }, 15)
 
+
+
+  window.addEventListener('wheel', (event) => event.preventDefault(), { passive: false });
+  window.addEventListener('mousedown', (event) => event.preventDefault(), { passive: false });
+  window.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
+  window.addEventListener('keydown', (event) => {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      event.preventDefault();
+    }
+  });
+  // вращение
+  // setInterval(() => {
+  //   points.rotation.x += 0.001
+  //   points.rotation.z += 0.001
+  // }, 15)
+  // points.rotation.x += 0.7
+  // points.rotation.z += 0.7
   let exploded = false;
   window.addEventListener('dblclick', () => {
     exploded = !exploded;
