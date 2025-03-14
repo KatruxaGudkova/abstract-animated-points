@@ -13,7 +13,13 @@ body {
   text-align: center;
   max-width: $page-width;
 }
-
+.lil-gui.root {
+  display: none;
+}
+element.style {
+  display: none;
+}
+c
 canvas {
   width: 100vw;
   height: 100vh;

@@ -8,7 +8,7 @@ const startApp = () => {
   const scene = useScene()
   const camera = useCamera()
 
-  const gui = useGui()
+  // const gui = useGui()
   const { width, height } = useRenderSize()
 
   // lighting
@@ -32,8 +32,6 @@ const startApp = () => {
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
-  let isHovered = false;
-
   let hoverTimeout;
   let isInside = false;
 
