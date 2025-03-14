@@ -143,19 +143,16 @@ const startApp = () => {
       varying vec3 vWorldPosition; // Мировая позиция
       
       void main() {
-        // vec3 color1 = vec3(0.2, 0.6, 1.0);
-        // vec3 color2 = vec3(0.1, 0.4, 1.0);
-        // vec3 color3 = vec3(0.3, 0.2, 0.6);
-        // vec3 color4 = vec3(1.0, 0.3, 0.8);
+
       // Вычисляем положение относительно камеры
       float depth = dot(vWorldPosition, normalize(cameraPosition));
 
       // цвета
-        vec3 color1 = vec3(1.0, 0.3, 0.8);
-        vec3 color2 = vec3(0.3, 0.2, 0.6);
-        vec3 color3 = vec3(0.1, 0.4, 1.0);
-        vec3 color4 = vec3(0.2, 0.6, 1.0);
-      
+        vec3 color1 = vec3(0.886, 0.615, 1.0);
+        vec3 color2 = vec3(0.811, 0.490, 0.937);
+        vec3 color3 = vec3(0.294, 0.667, 0.988);
+        vec3 color4 = vec3(0.509, 0.815, 0.843);
+        
     vec3 mixedColor;
     
       // Если точка на задней стороне (где Z < 0), применяем цвет фона
@@ -163,16 +160,21 @@ const startApp = () => {
         gl_FragColor = vec4(uBackgroundColor, 1.0);
       } else {
         // Передняя часть с вашим цветом
-        // vec3 frontColor = vec3(1.0, 0.3, 0.8); // Например, розовый цвет
-        // gl_FragColor = vec4(frontColor, 1.0);
+
       
-    if (vGradient < 0.33) {
-        mixedColor = mix(color1, color2, vGradient * 5.0); // От синего к розовому
-    } else if (vGradient < 0.76) {
-        mixedColor = mix(color2, color3, (vGradient - 0.23) * 3.0); // От розового к желтому
-    } else {
-        mixedColor = mix(color3, color4, (vGradient - 0.66) * 3.0); // От желтого к зеленому
-    }
+ // В fragmentShader
+if (vGradient < 0.23) {
+    // Плавный переход от розового к синему
+    mixedColor = mix(color1, color2, smoothstep(0.13, 0.33, vGradient));
+} else if (vGradient < 0.56) {
+    // Плавный переход от синего к бирюзовому
+    mixedColor = mix(color2, color3, smoothstep(0.33, 0.66, vGradient));
+} else {
+    // Плавный переход от бирюзового к зелено-голубому
+    mixedColor = mix(color3, color4, smoothstep(0.66, 1.0, vGradient));
+}
+
+
 
     gl_FragColor = vec4(mixedColor, 1.0);
       }}
@@ -192,7 +194,10 @@ const startApp = () => {
   // cameraFolder.open()
 
   // postprocessing
-  addPass(new UnrealBloomPass(new THREE.Vector2(width, height), 0.7, 0.4, 0.4))
+  //  0.3 — это сила свечения (уменьшена, чтобы свечение было слабее).
+  // 0.4 — это порог свечения, то есть только объекты, яркость которых превышает этот порог, будут светиться.
+  // 0.2 — это радиус свечения (уменьшен для сужения эффекта).
+  addPass(new UnrealBloomPass(new THREE.Vector2(width, height), 0.1, 0.1, 0.1))
 
   useTick(({ timestamp }) => {
     camera.position.z = 11;
