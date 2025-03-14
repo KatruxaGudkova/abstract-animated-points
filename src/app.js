@@ -19,7 +19,7 @@ const startApp = () => {
   scene.add(dirLight, ambientLight)
 
   // meshes
-  const geometry = new THREE.IcosahedronGeometry(1, 35)
+  const geometry = new THREE.IcosahedronGeometry(1, 60)
 
   const positions = geometry.attributes.position.array;
 
@@ -90,13 +90,17 @@ const startApp = () => {
     uniforms: {
       uTime: { value: 0 },
       uExplode: { value: 0 }, // Управляет разлётом (0 - норм, 1 - разлетелись)
-      uHoverEffect: { value: 0 } // Эффект желе
+      uHoverEffect: { value: 0 }, // Эффект желе
+      uBackgroundColor: { value: new THREE.Color(0x090a0b) }, // Цвет фона
+
     },
     vertexShader: `
       uniform float uTime;
       uniform float uExplode;
       uniform float uHoverEffect;
       varying float vGradient;
+
+      varying vec3 vWorldPosition; // Мировая позиция
 
       void main() {
         vec3 pos = position;
@@ -120,6 +124,9 @@ const startApp = () => {
         float hoverWave = sin(pos.x * 5.0 + uTime * 1.0) * 0.2 + cos(pos.y * 4.0 + uTime * 2.5) * 0.15;
         pos += normal * hoverWave * uHoverEffect;
   
+        // Мировая позиция
+        vWorldPosition = (modelMatrix * vec4(pos, 1.0)).xyz;
+
         // // Разлёт при двойном клике
         // pos += normal * uExplode * 2.0;
 
@@ -132,19 +139,33 @@ const startApp = () => {
     `,
     fragmentShader: `
       varying float vGradient;
+      uniform vec3 uBackgroundColor;
+      varying vec3 vWorldPosition; // Мировая позиция
       
       void main() {
         // vec3 color1 = vec3(0.2, 0.6, 1.0);
         // vec3 color2 = vec3(0.1, 0.4, 1.0);
         // vec3 color3 = vec3(0.3, 0.2, 0.6);
         // vec3 color4 = vec3(1.0, 0.3, 0.8);
+      // Вычисляем положение относительно камеры
+      float depth = dot(vWorldPosition, normalize(cameraPosition));
 
+      // цвета
         vec3 color1 = vec3(1.0, 0.3, 0.8);
         vec3 color2 = vec3(0.3, 0.2, 0.6);
         vec3 color3 = vec3(0.1, 0.4, 1.0);
         vec3 color4 = vec3(0.2, 0.6, 1.0);
       
     vec3 mixedColor;
+    
+      // Если точка на задней стороне (где Z < 0), применяем цвет фона
+      if (depth < 0.0) {
+        gl_FragColor = vec4(uBackgroundColor, 1.0);
+      } else {
+        // Передняя часть с вашим цветом
+        // vec3 frontColor = vec3(1.0, 0.3, 0.8); // Например, розовый цвет
+        // gl_FragColor = vec4(frontColor, 1.0);
+      
     if (vGradient < 0.33) {
         mixedColor = mix(color1, color2, vGradient * 5.0); // От синего к розовому
     } else if (vGradient < 0.76) {
@@ -154,7 +175,7 @@ const startApp = () => {
     }
 
     gl_FragColor = vec4(mixedColor, 1.0);
-      }
+      }}
     `
   });
 
