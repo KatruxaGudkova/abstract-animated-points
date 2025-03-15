@@ -53,9 +53,9 @@ export const initEngine = async () => {
   // const glitchPass = new GlitchPass()
   // composer.addPass(glitchPass)
 
-
-  stats = Stats()
-  document.body.appendChild(stats.dom)
+  // FPS,MB,MS счетчик
+  // stats = Stats()
+  // document.body.appendChild(stats.dom)
 
   gui = new GUI()
 

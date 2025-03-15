@@ -49,7 +49,8 @@ class TickManager extends EventTarget {
 
             this.tick(timestamp, timeDiffCapped, frame);
 
-            stats.update();
+            // FPS,MB,MS счетчик
+            // stats.update();
 
             // performance tracker end
         };
