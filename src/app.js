@@ -19,7 +19,10 @@ const startApp = () => {
   scene.add(dirLight, ambientLight)
 
   // meshes
-  const geometry = new THREE.IcosahedronGeometry(1, 60)
+  const isMobile = window.innerWidth <= 768;
+  const detail = isMobile ? 20 : 60; // На мобилке меньше деталей
+  const geometry = new THREE.IcosahedronGeometry(1, detail);
+
 
   const positions = geometry.attributes.position.array;
 
