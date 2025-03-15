@@ -179,9 +179,17 @@ if (vGradient < 0.23) {
     `
   });
 
-
   const points = new THREE.Points(geometry, material);
   scene.add(points);
+
+  // Адаптация для мобилок
+  function updateScale() {
+    const isMobile = window.innerWidth <= 768;
+    const scaleFactor = isMobile ? 0.5 : 1; // Уменьшаем в 2 раза на мобилке
+    points.scale.set(scaleFactor, scaleFactor, scaleFactor);
+  }
+  updateScale();
+  window.addEventListener("resize", updateScale);
 
 
   // GUI
