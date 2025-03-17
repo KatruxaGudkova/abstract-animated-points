@@ -232,14 +232,14 @@ if (vGradient < 0.23) {
 
 
 
-  window.addEventListener('wheel', (event) => event.preventDefault(), { passive: false });
-  window.addEventListener('mousedown', (event) => event.preventDefault(), { passive: false });
-  window.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
-  window.addEventListener('keydown', (event) => {
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
-      event.preventDefault();
-    }
-  });
+  // window.addEventListener('wheel', (event) => event.preventDefault(), { passive: false });
+  // window.addEventListener('mousedown', (event) => event.preventDefault(), { passive: false });
+  // window.addEventListener('touchmove', (event) => event.preventDefault(), { passive: false });
+  // window.addEventListener('keydown', (event) => {
+  //   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+  //     event.preventDefault();
+  //   }
+  // });
   // вращение
   // setInterval(() => {
   //   points.rotation.x += 0.001

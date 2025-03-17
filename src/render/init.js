@@ -81,6 +81,7 @@ export const initEngine = async () => {
 
       renderer.setSize(renderWidth, renderHeight)
       composer.setSize(renderWidth, renderHeight)
+
     },
     false
   )
