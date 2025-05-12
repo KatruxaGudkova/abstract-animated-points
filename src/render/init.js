@@ -34,7 +34,7 @@ export const initEngine = async () => {
   renderer.setSize(renderWidth, renderHeight)
   renderer.setPixelRatio(window.devicePixelRatio * 1.5)
 
-  renderer.setClearColor(0x090a0b)
+  renderer.setClearColor(0x000000)
 
 
   // shadow

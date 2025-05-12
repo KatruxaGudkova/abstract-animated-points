@@ -92,7 +92,7 @@ const startApp = () => {
       uTime: { value: 0 },
       uExplode: { value: 0 }, // Управляет разлётом (0 - норм, 1 - разлетелись)
       uHoverEffect: { value: 0 }, // Эффект желе
-      uBackgroundColor: { value: new THREE.Color(0x090a0b) }, // Цвет фона
+      uBackgroundColor: { value: new THREE.Color(0x000000) }, // Цвет фона
 
     },
     vertexShader: `
