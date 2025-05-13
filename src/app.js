@@ -197,7 +197,7 @@ if (vGradient < 0.23) {
 
   // GUI
   // const cameraFolder = gui.addFolder('Camera')
-  camera.position.z = 11; // Фиксируем z на нужном значении
+  // camera.position.z = 11; // Фиксируем z на нужном значении
 
   // cameraFolder.add(camera.position, 'z', 8, 10)
   // cameraFolder.open()
@@ -209,7 +209,7 @@ if (vGradient < 0.23) {
   addPass(new UnrealBloomPass(new THREE.Vector2(width, height), 0.1, 0.1, 0.1))
 
   useTick(({ timestamp }) => {
-    camera.position.z = 11;
+    camera.position.z = 12;
     points.rotation.set(0.7, 0, 0.5);
     material.uniforms.uTime.value = timestamp / 1000;
 
