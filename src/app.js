@@ -47,6 +47,10 @@ const startApp = () => {
     const intersects = raycaster.intersectObject(points);
 
     if (intersects.length > 0) {
+      const localPoint = points.worldToLocal(intersects[0].point.clone());
+      material.uniforms.uRippleOrigin.value.copy(localPoint);
+      material.uniforms.uRippleTime.value = 0;
+      material.uniforms.uRippleStrength.value = 1.0;
       // Мышка находится внутри фигуры
       if (!isInside) {
         // Мышка только что вошла внутрь, запускаем эффект
@@ -93,6 +97,9 @@ const startApp = () => {
       uExplode: { value: 0 }, // Управляет разлётом (0 - норм, 1 - разлетелись)
       uHoverEffect: { value: 0 }, // Эффект желе
       uBackgroundColor: { value: new THREE.Color(0x000000) }, // Цвет фона
+      uRippleOrigin: { value: new THREE.Vector3(0, 0, 0) },
+      uRippleStrength: { value: 0.0 },
+      uRippleTime: { value: 0.0 },
 
     },
     vertexShader: `
@@ -100,12 +107,24 @@ const startApp = () => {
       uniform float uExplode;
       uniform float uHoverEffect;
       varying float vGradient;
+      uniform vec3 uRippleOrigin;
+      uniform float uRippleStrength;
+      uniform float uRippleTime;
 
       varying vec3 vWorldPosition; // Мировая позиция
 
       void main() {
         vec3 pos = position;
-  
+
+        
+        // Вычисляем расстояние до центра ряби
+        float dist = distance(pos, uRippleOrigin);
+
+        // Круговая волна: смещение по нормали
+        float ripple = sin(dist * 6.0 - uRippleTime * 5.0); // 10.0 — частота, 5.0 — скорость волны
+        ripple *= exp(-dist * 2.0); // затухание волны с расстоянием
+        pos += normal * ripple * uRippleStrength;
+
         // Волнообразное движение
         // float wave = sin(pos.x * 6.0 + uTime); //* cos(pos.y *4.0 + uTime)
         // pos += normal * wave; 
@@ -122,8 +141,8 @@ const startApp = () => {
 
         
         // Эффект желе при наведении
-        float hoverWave = sin(pos.x * 5.0 + uTime * 1.0) * 0.2 + cos(pos.y * 4.0 + uTime * 2.5) * 0.15;
-        pos += normal * hoverWave * uHoverEffect;
+        // float hoverWave = sin(pos.x * 5.0 + uTime * 1.0) * 0.2 + cos(pos.y * 4.0 + uTime * 2.5) * 0.15;
+        // pos += normal * hoverWave * uHoverEffect;
   
         // Мировая позиция
         vWorldPosition = (modelMatrix * vec4(pos, 1.0)).xyz;
@@ -212,7 +231,10 @@ if (vGradient < 0.23) {
     camera.position.z = 12;
     points.rotation.set(0.7, 0, 0.5);
     material.uniforms.uTime.value = timestamp / 1000;
+    material.uniforms.uRippleTime.value += 0.03;
 
+    // Плавное затухание ряби
+    material.uniforms.uRippleStrength.value *= 0.95; // экспоненциальное затухание
     // Плавное изменение эффекта желе
     if (isInside) {
       gsap.to(material.uniforms.uHoverEffect, {
