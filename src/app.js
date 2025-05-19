@@ -12,11 +12,11 @@ const startApp = () => {
   const { width, height } = useRenderSize()
 
   // lighting
-  const dirLight = new THREE.DirectionalLight('#ADFF2F', 0.6)
-  dirLight.position.set(2, 2, 2)
+  // const dirLight = new THREE.DirectionalLight('#ADFF2F', 0.6)
+  // dirLight.position.set(2, 2, 2)
 
-  const ambientLight = new THREE.AmbientLight('#526cff', 0.5)
-  scene.add(dirLight, ambientLight)
+  // const ambientLight = new THREE.AmbientLight('#526cff', 0.5)
+  // scene.add(dirLight, ambientLight)
 
   // meshes
   const isMobile = window.innerWidth <= 768;
@@ -39,8 +39,15 @@ const startApp = () => {
   let isInside = false;
 
   function onMouseMove(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    const canvas = document.querySelector('canvas');
+    const rect = canvas.getBoundingClientRect();
+
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    // mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    // mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     // Проверяем пересечение луча с фигурой
     raycaster.setFromCamera(mouse, camera);
