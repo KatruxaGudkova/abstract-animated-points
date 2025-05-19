@@ -235,7 +235,7 @@ if (vGradient < 0.23) {
   addPass(new UnrealBloomPass(new THREE.Vector2(width, height), 0.1, 0.1, 0.1))
 
   useTick(({ timestamp }) => {
-    camera.position.z = 10.6;
+    camera.position.z = 10;
     points.rotation.set(0.7, 0, 0.5);
     material.uniforms.uTime.value = timestamp / 1000;
     material.uniforms.uRippleTime.value += 0.03;
