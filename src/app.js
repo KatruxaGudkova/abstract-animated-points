@@ -177,26 +177,23 @@ const startApp = () => {
     
       // Если точка на задней стороне (где Z < 0), применяем цвет фона
       if (depth < 0.0) {
-        gl_FragColor = vec4(uBackgroundColor, 1.0);
+        discard;
+        // gl_FragColor = vec4(uBackgroundColor, 1.0);
       } else {
         // Передняя часть с вашим цветом
+        // В fragmentShader
+        if (vGradient < 0.23) {
+            // Плавный переход от розового к синему
+            mixedColor = mix(color1, color2, smoothstep(0.13, 0.33, vGradient));
+        } else if (vGradient < 0.56) {
+            // Плавный переход от синего к бирюзовому
+            mixedColor = mix(color2, color3, smoothstep(0.33, 0.66, vGradient));
+        } else {
+            // Плавный переход от бирюзового к зелено-голубому
+            mixedColor = mix(color3, color4, smoothstep(0.66, 1.0, vGradient));
+        }
 
-      
- // В fragmentShader
-if (vGradient < 0.23) {
-    // Плавный переход от розового к синему
-    mixedColor = mix(color1, color2, smoothstep(0.13, 0.33, vGradient));
-} else if (vGradient < 0.56) {
-    // Плавный переход от синего к бирюзовому
-    mixedColor = mix(color2, color3, smoothstep(0.33, 0.66, vGradient));
-} else {
-    // Плавный переход от бирюзового к зелено-голубому
-    mixedColor = mix(color3, color4, smoothstep(0.66, 1.0, vGradient));
-}
-
-
-
-    gl_FragColor = vec4(mixedColor, 1.0);
+        gl_FragColor = vec4(mixedColor, 1.0);
       }}
     `
   });
