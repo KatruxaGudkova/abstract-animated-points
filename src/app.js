@@ -1,22 +1,15 @@
 import * as THREE from 'three'
 import gsap from "gsap";
-import { addPass, useCamera, useGui, useRenderSize, useScene, useTick } from './render/init.js'
+import { addPass, useCamera, useRenderSize, useScene, useTick } from './render/init.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 
+let disposed = false;
 
 const startApp = () => {
   const scene = useScene()
   const camera = useCamera()
 
-  // const gui = useGui()
   const { width, height } = useRenderSize()
-
-  // lighting
-  // const dirLight = new THREE.DirectionalLight('#ADFF2F', 0.6)
-  // dirLight.position.set(2, 2, 2)
-
-  // const ambientLight = new THREE.AmbientLight('#526cff', 0.5)
-  // scene.add(dirLight, ambientLight)
 
   // meshes
   const isMobile = window.innerWidth <= 768;
@@ -39,7 +32,7 @@ const startApp = () => {
   let isInside = false;
 
   function onMouseMove(event) {
-
+    if (disposed) return;
     const canvas = document.querySelector('canvas');
     const rect = canvas.getBoundingClientRect();
 
@@ -221,20 +214,17 @@ if (vGradient < 0.23) {
   window.addEventListener("resize", updateScale);
 
 
-  // GUI
-  // const cameraFolder = gui.addFolder('Camera')
-  // camera.position.z = 11; // Фиксируем z на нужном значении
-
-  // cameraFolder.add(camera.position, 'z', 8, 10)
-  // cameraFolder.open()
-
   // postprocessing
   //  0.3 — это сила свечения (уменьшена, чтобы свечение было слабее).
   // 0.4 — это порог свечения, то есть только объекты, яркость которых превышает этот порог, будут светиться.
   // 0.2 — это радиус свечения (уменьшен для сужения эффекта).
-  addPass(new UnrealBloomPass(new THREE.Vector2(width, height), 0.1, 0.1, 0.1))
+  addPass(new UnrealBloomPass(new THREE.Vector2(width, height), 0.05, 0.1, 0.05))
+
+
+  let currentHoverTarget = null;
 
   useTick(({ timestamp }) => {
+    if (disposed) return;
     camera.position.z = 10;
     points.rotation.set(0.7, 0, 0.5);
     material.uniforms.uTime.value = timestamp / 1000;
@@ -243,21 +233,39 @@ if (vGradient < 0.23) {
     // Плавное затухание ряби
     material.uniforms.uRippleStrength.value *= 0.95; // экспоненциальное затухание
     // Плавное изменение эффекта желе
-    if (isInside) {
+    //   if (isInside) {
+    //     gsap.to(material.uniforms.uHoverEffect, {
+    //       value: 1.0,
+    //       duration: 2,
+    //       ease: "power2.out"
+    //     });
+    //   } else {
+    //     gsap.to(material.uniforms.uHoverEffect, {
+    //       value: 0.0,
+    //       duration: 0.5,
+    //       ease: "power2.out"
+    //     });
+    //   }
+    // });
+
+    if (isInside && currentHoverTarget !== 1.0) {
+      currentHoverTarget = 1.0;
       gsap.to(material.uniforms.uHoverEffect, {
         value: 1.0,
         duration: 2,
-        ease: "power2.out"
+        ease: "power2.out",
+        onComplete: () => currentHoverTarget = null
       });
-    } else {
+    } else if (!isInside && currentHoverTarget !== 0.0) {
+      currentHoverTarget = 0.0;
       gsap.to(material.uniforms.uHoverEffect, {
         value: 0.0,
         duration: 0.5,
-        ease: "power2.out"
+        ease: "power2.out",
+        onComplete: () => currentHoverTarget = null
       });
     }
   });
-
 
 
 
@@ -286,6 +294,14 @@ if (vGradient < 0.23) {
       duration: 3.5,//сколько секунд идёт анимация 
       ease: "power2.out"
     });
+  });
+  // Очистка ресурсов при выгрузке
+  window.addEventListener('beforeunload', () => {
+    disposed = true;
+    window.removeEventListener("mousemove", onMouseMove);
+    geometry.dispose();
+    material.dispose();
+    scene.remove(points);
   });
 }
 
