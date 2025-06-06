@@ -13,7 +13,7 @@ const startApp = () => {
 
   // meshes
   const isMobile = window.innerWidth <= 768;
-  const detail = isMobile ? 20 : 60; // На мобилке меньше деталей
+  const detail = isMobile ? 20 : 30; // На мобилке меньше деталей
   const geometry = new THREE.IcosahedronGeometry(1, detail);
 
 

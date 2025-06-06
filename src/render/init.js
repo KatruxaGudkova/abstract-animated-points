@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
-import Stats from 'three/examples/jsm/libs/stats.module.js'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 // import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
@@ -20,10 +19,11 @@ let scene,
 const renderTickManager = new TickManager()
 
 export const initEngine = async () => {
+  const container = document.getElementById('root')
   scene = new THREE.Scene()
 
-  renderWidth = window.innerWidth
-  renderHeight = window.innerHeight
+  renderWidth = container.clientWidth
+  renderHeight = container.clientHeight
 
   renderAspectRatio = renderWidth / renderHeight
 
