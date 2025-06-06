@@ -19,11 +19,13 @@ let scene,
 const renderTickManager = new TickManager()
 
 export const initEngine = async () => {
-  const container = document.getElementById('root')
+  // const container = document.getElementById('root')
   scene = new THREE.Scene()
 
-  renderWidth = container.clientWidth
-  renderHeight = container.clientHeight
+  scene = new THREE.Scene()
+
+  renderWidth = window.innerWidth
+  renderHeight = window.innerHeight
 
   renderAspectRatio = renderWidth / renderHeight
 
